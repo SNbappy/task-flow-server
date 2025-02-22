@@ -88,21 +88,51 @@ async function run() {
 
 
         // ✅ Update Task Status
-        app.put('/tasks/:id', async (req, res) => {
-            const { id } = req.params;
-            const { status } = req.body;
-            if (!status) return res.status(400).json({ error: "Status is required" });
+        // app.put('/tasks/:id', async (req, res) => {
+        //     const { id } = req.params;
+        //     const { status } = req.body;
+        //     if (!status) return res.status(400).json({ error: "Status is required" });
 
+        //     try {
+        //         const result = await tasksCollection.updateOne(
+        //             { _id: new ObjectId(id) },
+        //             { $set: { status } }
+        //         );
+        //         res.json(result);
+        //     } catch (error) {
+        //         res.status(500).json({ error: "Failed to update task" });
+        //     }
+        // });
+
+        app.put("/tasks/:id", async (req, res) => {
             try {
+                const { id } = req.params;
+                const { title, description, status } = req.body;
+
                 const result = await tasksCollection.updateOne(
-                    { _id: new ObjectId(id) },
-                    { $set: { status } }
+                    { _id: new ObjectId(id) }, // ✅ Convert id to ObjectId
+                    { $set: { title, description, status } } // ✅ Update fields
                 );
-                res.json(result);
+
+                if (result.matchedCount === 0) {
+                    return res.status(404).json({ message: "Task not found" });
+                }
+
+                res.json({ message: "Task updated successfully" });
             } catch (error) {
-                res.status(500).json({ error: "Failed to update task" });
+                console.error("Error updating task:", error);
+                res.status(500).json({ message: "Error updating task", error });
             }
         });
+
+
+
+
+
+
+
+
+
 
         // ✅ Delete a Task
         app.delete('/tasks/:id', async (req, res) => {
